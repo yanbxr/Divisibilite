@@ -1,0 +1,2058 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="crible d'ératosthène, décomposition en facteurs premiers et algorithme d'euclide : pgcd et ppcm corrigés étape par étape."
+    />
+    <meta name="theme-color" content="#d97757" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="pgcd et ppcm" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:url" content="https://yanbxr.github.io/divisibilite/" />
+    <meta property="og:title" content="correcteur de pgcd et ppcm" />
+    <meta
+      property="og:description"
+      content="décomposition en facteurs premiers et algorithme d'euclide : chaque exercice corrigé étape par étape, avec un schéma."
+    />
+    <meta property="og:image" content="https://yanbxr.github.io/divisibilite/og.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="correcteur de pgcd et ppcm : décomposition en colonnes de 84 et 126, pgcd égal à 42"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23000'/%3E%3Ctext x='16' y='24' font-size='24' text-anchor='middle' fill='%23d97757'%3E%E2%9C%BB%3C/text%3E%3C/svg%3E"
+    />
+    <title>correcteur de pgcd et ppcm</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"
+    />
+    <style>
+      :root {
+        --bg: #000000;
+        --panel: #0b0b0b;
+        --ink: #ededed;
+        --dim: #8b8b8b;
+        --line: #262626;
+        --grid: #171717;
+        --accent: #d97757;
+        --accent-soft: #2b1810;
+        --ok: #8bc48a;
+        --err: #ef7d6d;
+        --err-soft: #2a1212;
+        --sign: #c39bff;
+        --sign-soft: #1d1430;
+        --exp: #6fcf97;
+        --exp-soft: #0e2417;
+        --mant: #7aa7ff;
+        --mant-soft: #0f1a30;
+        --chip: #161616;
+        --scrim: rgba(0, 0, 0, 0.7);
+        --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+        color-scheme: dark;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        -webkit-text-size-adjust: 100%;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font: 15px/1.6 var(--mono);
+      }
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0 0 auto;
+        height: env(safe-area-inset-top, 0px);
+        background: var(--bg);
+        z-index: 35;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      button {
+        font-family: inherit;
+        cursor: pointer;
+        touch-action: manipulation;
+      }
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      .wrap {
+        max-width: 1360px;
+        margin: 0 auto;
+        padding-left: max(16px, env(safe-area-inset-left, 0px));
+        padding-right: max(16px, env(safe-area-inset-right, 0px));
+        padding-block: 20px 56px;
+      }
+
+      .topbar {
+        display: none;
+      }
+      .compact .topbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        position: sticky;
+        top: env(safe-area-inset-top, 0px);
+        z-index: 30;
+        background: var(--bg);
+        padding-block: 10px;
+        margin-bottom: 12px;
+        border-bottom: 1px solid var(--line);
+      }
+      .burger {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        flex: none;
+        color: var(--ink);
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+      .burger svg {
+        width: 20px;
+        height: 20px;
+      }
+      .crumb {
+        color: var(--dim);
+        font-size: 14px;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .crumb b {
+        color: var(--ink);
+        font-weight: 500;
+      }
+
+      .home {
+        display: grid;
+        gap: 18px;
+        padding-top: 6px;
+      }
+      .home h1 {
+        margin: 0;
+        font-size: clamp(20px, 3vw, 26px);
+        font-weight: 700;
+        text-wrap: balance;
+      }
+      .home h1 span {
+        color: var(--accent);
+        margin-right: 10px;
+      }
+      .home p {
+        margin: 0;
+        color: var(--dim);
+      }
+      .home ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+        gap: 10px;
+      }
+      .home li button {
+        width: 100%;
+        height: 100%;
+        text-align: left;
+        display: grid;
+        gap: 4px;
+        padding: 14px 16px;
+        color: var(--ink);
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+      }
+      .home li button:hover {
+        border-color: var(--accent);
+      }
+      .home li b {
+        font-weight: 700;
+      }
+      .home li b::before {
+        content: '❯ ';
+        color: var(--accent);
+      }
+      .home li span {
+        color: var(--dim);
+        font-size: 13px;
+      }
+
+      .tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px;
+        margin: 0 0 16px;
+        border-bottom: 1px solid var(--line);
+      }
+      .tabs button {
+        font-size: 13px;
+        color: var(--dim);
+        background: none;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        padding: 8px 7px;
+        margin-bottom: -1px;
+        white-space: nowrap;
+      }
+      .tabs button:hover {
+        color: var(--ink);
+      }
+      .tabs button[aria-selected='true'] {
+        color: var(--ink);
+        border-bottom-color: var(--accent);
+      }
+      .compact .tabs {
+        display: none;
+      }
+
+      .scrim {
+        position: fixed;
+        inset: 0;
+        background: var(--scrim);
+        z-index: 40;
+      }
+      .drawer {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 50;
+        width: min(300px, 86vw);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background: var(--panel);
+        border-right: 1px solid var(--line);
+        padding: calc(env(safe-area-inset-top, 0px) + 14px) 12px calc(env(safe-area-inset-bottom, 0px) + 14px)
+          max(12px, env(safe-area-inset-left, 0px));
+        transform: translateX(-100%);
+        visibility: hidden;
+        transition:
+          transform 0.2s ease,
+          visibility 0.2s;
+      }
+      .drawer.open {
+        transform: none;
+        visibility: visible;
+        box-shadow: 0 0 40px rgba(0, 0, 0, 0.25);
+      }
+      .drawer-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 4px 0 10px;
+      }
+      .drawer-head .drawer-home {
+        width: auto;
+        height: auto;
+        padding: 6px 8px;
+        margin-left: -8px;
+        font-size: 15px;
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .drawer-head .drawer-home:hover {
+        color: var(--accent);
+      }
+      .tabs button.home-link {
+        color: var(--accent);
+        font-size: 15px;
+        padding-inline: 10px 12px;
+      }
+      .drawer-head button {
+        width: 38px;
+        height: 38px;
+        border: 0;
+        border-radius: 8px;
+        background: none;
+        color: var(--dim);
+        font-size: 18px;
+      }
+      .drawer-head button:hover {
+        background: var(--chip);
+        color: var(--ink);
+      }
+      .drawer ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 2px;
+        overflow-y: auto;
+      }
+      .drawer li button {
+        width: 100%;
+        text-align: left;
+        font-size: 14px;
+        color: var(--ink);
+        background: none;
+        border: 0;
+        border-radius: 8px;
+        padding: 11px 10px;
+        min-height: 44px;
+      }
+      .drawer li button::before {
+        content: '❯ ';
+        color: var(--accent);
+        opacity: 0;
+      }
+      .drawer li button:hover {
+        background: var(--chip);
+      }
+      .drawer li button[aria-current='true'] {
+        background: var(--chip);
+        color: var(--accent);
+      }
+      .drawer li button[aria-current='true']::before {
+        opacity: 1;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .drawer {
+          transition: none;
+        }
+      }
+
+      .enonce {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 14px 16px;
+        display: grid;
+        gap: 14px;
+      }
+      .fields {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        align-items: end;
+      }
+      .field {
+        display: grid;
+        gap: 5px;
+        min-width: 0;
+        max-width: 100%;
+      }
+      .field > label,
+      .field > span {
+        font-size: 12px;
+        color: var(--dim);
+      }
+      .prompt {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 0 14px 0 12px;
+        background: var(--bg);
+        max-width: 100%;
+        min-width: 0;
+      }
+      .prompt.small {
+        width: 110px;
+      }
+      .prompt.small input {
+        flex: 1;
+        width: auto;
+      }
+      .prompt::before {
+        content: '❯';
+        color: var(--accent);
+      }
+      .prompt:focus-within {
+        border-color: var(--accent);
+      }
+      .prompt input {
+        flex: 0 1 auto;
+        width: 20ch;
+        max-width: 100%;
+        min-width: 0;
+        border: 0;
+        background: transparent;
+        color: var(--ink);
+        font: 16px var(--mono);
+        padding: 9px 0;
+      }
+      .prompt input:focus-visible {
+        outline: none;
+      }
+      select {
+        font: 15px var(--mono);
+        color: var(--ink);
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 9px 10px;
+      }
+      .seg {
+        display: inline-flex;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--bg);
+      }
+      .seg button {
+        font-size: 14px;
+        border: 0;
+        background: transparent;
+        color: var(--dim);
+        padding: 9px 12px;
+      }
+      .seg button::before {
+        content: '❯ ';
+        opacity: 0;
+      }
+      .seg button[aria-pressed='true'] {
+        color: var(--accent);
+        background: var(--accent-soft);
+      }
+      .seg button[aria-pressed='true']::before {
+        opacity: 1;
+      }
+      .ex {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+        font-size: 13px;
+        color: var(--dim);
+      }
+      .ex button {
+        font-size: 13px;
+        color: var(--ink);
+        background: var(--chip);
+        border: 0;
+        border-radius: 6px;
+        padding: 6px 10px;
+        min-height: 32px;
+        text-align: left;
+        overflow-wrap: anywhere;
+      }
+      .ex button:hover {
+        color: var(--accent);
+      }
+
+      .out {
+        display: grid;
+        gap: 14px;
+        margin-top: 14px;
+      }
+      .result {
+        padding: 2px 2px 4px;
+      }
+      .line {
+        display: flex;
+        gap: 10px;
+        align-items: baseline;
+        font-weight: 700;
+      }
+      .line::before {
+        content: '●';
+        color: var(--accent);
+        font-size: 12px;
+      }
+      .ans {
+        margin: 4px 0 0 22px;
+        font-size: clamp(18px, 3vw, 24px);
+        font-weight: 700;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+      }
+      .ans sub {
+        font-size: 0.55em;
+        color: var(--dim);
+        font-weight: 400;
+      }
+      .tail {
+        margin: 4px 0 0 22px;
+        color: var(--dim);
+        font-size: 14px;
+        display: flex;
+        gap: 10px;
+      }
+      .tail::before {
+        content: '└';
+      }
+      .error {
+        border: 1px solid var(--err);
+        background: var(--err-soft);
+        border-radius: 10px;
+        padding: 12px 14px;
+      }
+      .error .line::before {
+        color: var(--err);
+      }
+      .error .tail {
+        color: var(--ink);
+      }
+
+      .box {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 14px 16px;
+        min-width: 0;
+      }
+      .box > .line {
+        margin-bottom: 12px;
+      }
+      .viz {
+        display: grid;
+        gap: 20px;
+      }
+      .viz-body {
+        display: grid;
+        gap: 22px;
+        background-image: radial-gradient(var(--grid) 1px, transparent 1px);
+        background-size: 16px 16px;
+      }
+      .viz h3 {
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0 0 8px;
+      }
+      .note {
+        margin: 8px 0 0;
+        color: var(--dim);
+        font-size: 13px;
+      }
+      .scroll {
+        overflow-x: auto;
+        max-width: 100%;
+      }
+      .out,
+      .viz,
+      .viz-body,
+      .stack,
+      .enonce {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .viz-body > *,
+      .stack > * {
+        min-width: 0;
+      }
+      .steps li span,
+      .tail,
+      .note,
+      .norm,
+      mark {
+        overflow-wrap: anywhere;
+      }
+      .steps ol {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 8px;
+      }
+      .steps li {
+        display: grid;
+        grid-template-columns: 22px minmax(0, 1fr);
+      }
+      .steps li::before {
+        content: '●';
+        color: var(--accent);
+        font-size: 10px;
+        line-height: 2.4;
+      }
+      mark {
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-weight: 700;
+        padding: 0 3px;
+        border-radius: 3px;
+      }
+      .ok {
+        color: var(--ok);
+      }
+
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 16px;
+        font-size: 13px;
+        color: var(--dim);
+        margin-top: 10px;
+      }
+      .legend span::before {
+        content: '';
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+        margin-right: 6px;
+        background: var(--c);
+      }
+      .stack {
+        display: grid;
+        gap: 14px;
+      }
+
+      table.t {
+        border-collapse: collapse;
+        font-variant-numeric: tabular-nums;
+        background: var(--panel);
+      }
+      table.t th,
+      table.t td {
+        border: 1px solid var(--line);
+        padding: 4px 10px;
+        text-align: right;
+        font-size: 14px;
+      }
+      table.t th {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--dim);
+        text-align: center;
+      }
+      table.t td.b {
+        text-align: center;
+        color: var(--accent);
+        font-weight: 700;
+        background: var(--accent-soft);
+      }
+      table.t td.l {
+        text-align: left;
+      }
+      table.t tr.hl td {
+        background: var(--accent-soft);
+        font-weight: 700;
+      }
+      .norm {
+        font-size: 17px;
+        line-height: 1.9;
+        overflow-wrap: anywhere;
+      }
+      .norm .hint {
+        color: var(--dim);
+        font-size: 13px;
+        margin-left: 12px;
+      }
+
+      @media (max-width: 560px) {
+        .fields {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+        }
+        .field.wide {
+          grid-column: 1 / -1;
+        }
+        .prompt,
+        .prompt.small,
+        select {
+          width: 100%;
+        }
+        .prompt input {
+          flex: 1;
+        }
+        .seg {
+          display: flex;
+        }
+        .seg button {
+          flex: 1;
+          min-height: 44px;
+          padding-inline: 6px;
+        }
+        .enonce,
+        .box {
+          padding: 14px 12px;
+        }
+        .ans,
+        .tail {
+          margin-left: 0;
+        }
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .out > * {
+          animation: rise 0.2s ease both;
+        }
+        @keyframes rise {
+          from {
+            opacity: 0.5;
+            transform: translateY(3px);
+          }
+        }
+      }
+      .fcols {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px 34px;
+        align-items: flex-start;
+      }
+      .fcol {
+        display: grid;
+        gap: 6px;
+      }
+      .fcol .cap {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--c, var(--accent));
+      }
+      .fgrid {
+        display: grid;
+        grid-template-columns: auto auto;
+        width: max-content;
+        font-size: 16px;
+        line-height: 1.75;
+        font-variant-numeric: tabular-nums;
+      }
+      .fgrid .n {
+        text-align: right;
+        padding-right: 12px;
+        border-right: 1.5px solid var(--ink);
+      }
+      .fgrid .p {
+        padding-left: 12px;
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .fgrid .end {
+        color: var(--dim);
+      }
+      .fres {
+        font-size: 15px;
+        overflow-wrap: anywhere;
+      }
+      .fres b {
+        color: var(--c, var(--accent));
+      }
+      .c0 {
+        --c: var(--sign);
+        --c-soft: var(--sign-soft);
+      }
+      .c1 {
+        --c: var(--exp);
+        --c-soft: var(--exp-soft);
+      }
+      .c2 {
+        --c: var(--mant);
+        --c-soft: var(--mant-soft);
+      }
+      .c3 {
+        --c: var(--ink);
+        --c-soft: var(--chip);
+      }
+      table.t td.who {
+        text-align: left;
+        color: var(--c);
+        font-weight: 700;
+      }
+      table.t td.zero {
+        color: var(--dim);
+      }
+      table.t td.carry {
+        color: var(--mant);
+      }
+      table.t td.rest {
+        color: var(--accent);
+        font-weight: 700;
+      }
+      table.t tr.hl td.rest {
+        color: var(--ink);
+      }
+      table.t td.done {
+        color: var(--ok);
+        font-weight: 700;
+      }
+      .frac {
+        display: inline-grid;
+        grid-template-columns: minmax(0, auto);
+        max-width: 100%;
+        text-align: center;
+        vertical-align: middle;
+        line-height: 1.25;
+        margin: 0 2px;
+      }
+      .frac > span {
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+      .frac > span:first-child {
+        border-bottom: 2px solid currentColor;
+        padding: 0 6px;
+      }
+      .fracline {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px 16px;
+        font-size: 20px;
+        font-weight: 700;
+      }
+      .fracline .by {
+        font-size: 13px;
+        color: var(--dim);
+        font-weight: 400;
+      }
+      .fracline .res {
+        color: var(--accent);
+      }
+      .ans .frac {
+        font-size: 0.85em;
+      }
+      .stepper {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 12px;
+      }
+      .stepper button {
+        font-size: 13px;
+        color: var(--ink);
+        background: var(--chip);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 6px 12px;
+        min-height: 38px;
+        min-width: 44px;
+      }
+      .stepper button:hover:not(:disabled) {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .stepper button:disabled {
+        opacity: 0.35;
+        cursor: default;
+      }
+      .stepper .count {
+        font-size: 13px;
+        color: var(--dim);
+        margin-left: 6px;
+      }
+      .caption {
+        margin: 0 0 14px;
+        padding: 8px 12px;
+        border-left: 3px solid var(--accent);
+        background: var(--bg);
+        font-size: 14px;
+        overflow-wrap: anywhere;
+      }
+      .steps li.past span {
+        color: var(--dim);
+      }
+      .steps li.past mark {
+        background: transparent;
+        color: var(--dim);
+      }
+      .steps li.current::before {
+        font-size: 14px;
+        line-height: 1.7;
+      }
+      .steps li.later {
+        display: none;
+      }
+      .out.quiet > * {
+        animation: none;
+      }
+      .k0 {
+        --kc: var(--sign);
+        --ks: var(--sign-soft);
+      }
+      .k1 {
+        --kc: var(--exp);
+        --ks: var(--exp-soft);
+      }
+      .k2 {
+        --kc: var(--mant);
+        --ks: var(--mant-soft);
+      }
+      .k3 {
+        --kc: var(--accent);
+        --ks: var(--accent-soft);
+      }
+      .k4 {
+        --kc: var(--err);
+        --ks: var(--err-soft);
+      }
+      .k5 {
+        --kc: var(--ink);
+        --ks: var(--chip);
+      }
+      .sieve {
+        display: grid;
+        grid-template-columns: repeat(10, minmax(0, 1fr));
+        gap: 4px;
+        max-width: 560px;
+      }
+      .sieve span {
+        aspect-ratio: 1 / 1;
+        min-width: 0;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        font-size: clamp(11px, 3vw, 15px);
+        font-variant-numeric: tabular-nums;
+      }
+      .sieve span.x {
+        color: var(--kc);
+        background: var(--ks);
+        border-color: transparent;
+        text-decoration: line-through;
+        text-decoration-thickness: 2px;
+        opacity: 0.55;
+      }
+      .sieve span.x.now {
+        opacity: 1;
+        border-color: var(--kc);
+      }
+      .sieve span.one {
+        color: var(--dim);
+        background: var(--chip);
+      }
+      .sieve span.p {
+        color: var(--kc);
+        border: 2px solid var(--kc);
+        border-radius: 50%;
+        font-weight: 700;
+      }
+      .sieve span.p.rest {
+        --kc: var(--ink);
+      }
+      table.t td.lo {
+        color: var(--accent);
+        font-weight: 700;
+      }
+      table.t td.hi {
+        color: var(--mant);
+        font-weight: 700;
+      }
+      table.t td.lo.hi {
+        color: var(--ink);
+      }
+      table.t tr.rg td {
+        color: var(--accent);
+        background: var(--accent-soft);
+        font-weight: 700;
+      }
+      table.t tr.rl td {
+        color: var(--mant);
+        background: var(--mant-soft);
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <button
+          class="burger"
+          id="burger"
+          type="button"
+          aria-label="ouvrir la liste des outils"
+          aria-expanded="false"
+          aria-controls="drawer"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <path d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+        </button>
+        <span class="crumb">pgcd / <b id="crumb"></b></span>
+      </div>
+
+      <nav class="tabs" id="tabs" role="tablist" aria-label="outils"></nav>
+
+      <main id="panel"></main>
+    </div>
+
+    <div class="scrim" id="scrim" hidden></div>
+    <aside class="drawer" id="drawer" aria-label="outils" inert>
+      <div class="drawer-head">
+        <button type="button" class="drawer-home" data-id="accueil">✻ pgcd et ppcm</button>
+        <button type="button" id="drawer-close" aria-label="fermer la liste">✕</button>
+      </div>
+      <ul id="drawer-list"></ul>
+    </aside>
+
+    <script>
+      const AR = (() => {
+        const fail = (err) => ({ err });
+        const LIMIT = 100000n;
+
+        function parseList(str, { min = 2, max = 8, label = 'entiers' } = {}) {
+          const parts = String(str)
+            .split(/[\s,;]+/)
+            .filter(Boolean);
+          if (!parts.length || parts.some((p) => !/^\d+$/.test(p))) {
+            return fail(
+              `saisissez ${min > 1 ? `au moins ${min} ` : 'des '}${label} positifs, séparés par un espace.`,
+            );
+          }
+          if (parts.length < min) return fail(`saisissez au moins ${min} ${label}, séparés par un espace.`);
+          if (parts.length > max) return fail(`saisissez au plus ${max} ${label}.`);
+          return parts.map((p) => BigInt(p));
+        }
+
+        function parseOne(str) {
+          const s = String(str).replace(/\s+/g, '');
+          if (!/^\d+$/.test(s)) return fail('saisissez un entier positif.');
+          return BigInt(s);
+        }
+
+        function isSmallPrime(p) {
+          if (p < 2n) return false;
+          if (p % 2n === 0n) return p === 2n;
+          for (let d = 3n; d * d <= p; d += 2n) if (p % d === 0n) return false;
+          return true;
+        }
+
+        function nextPrime(p) {
+          if (p === 2n) return 3n;
+          let q = p + 2n;
+          while (!isSmallPrime(q)) q += 2n;
+          return q;
+        }
+
+        function isqrt(n) {
+          if (n < 2n) return n;
+          let x = BigInt(Math.floor(Math.sqrt(Number(n))));
+          while (x * x > n) x -= 1n;
+          while ((x + 1n) * (x + 1n) <= n) x += 1n;
+          return x;
+        }
+
+        function criterion(m, p) {
+          const s = m.toString();
+          const digits = [...s].map(Number);
+          if (p === 2n) return { kind: 'pair', last: digits[digits.length - 1] };
+          if (p === 3n) return { kind: 'somme', digits, sum: digits.reduce((a, b) => a + b, 0) };
+          if (p === 5n) return { kind: 'fin', last: digits[digits.length - 1] };
+          if (p === 11n) {
+            const alt = digits.reverse().reduce((a, d, i) => a + (i % 2 ? -d : d), 0);
+            return { kind: 'alternee', alt };
+          }
+          return { kind: 'division' };
+        }
+
+        function factorize(n) {
+          if (n < 2n) return { n, rows: [], factors: [] };
+          const rows = [];
+          let m = n;
+          let p = 2n;
+          let last = null;
+          let skipped = [];
+          while (m > 1n) {
+            if (p * p > m) {
+              rows.push({ n: m, p: m, q: 1n, kind: 'premier', skipped, bound: p, stopped: last });
+              break;
+            }
+            if (m % p === 0n) {
+              const kind = p === last ? 'encore' : 'nouveau';
+              rows.push({
+                n: m,
+                p,
+                q: m / p,
+                kind,
+                skipped,
+                stopped: kind === 'nouveau' ? last : null,
+                crit: criterion(m, p),
+              });
+              skipped = [];
+              last = p;
+              m /= p;
+              continue;
+            }
+            if (p !== last) skipped.push(p);
+            p = nextPrime(p);
+            if (p > LIMIT) {
+              return fail(
+                `ce nombre a deux facteurs premiers supérieurs à ${LIMIT.toLocaleString('fr-FR')} : la décomposition à la main n'est pas raisonnable.`,
+              );
+            }
+          }
+          const factors = [];
+          for (const r of rows) {
+            const f = factors.find((x) => x.p === r.p);
+            if (f) f.e += 1;
+            else factors.push({ p: r.p, e: 1 });
+          }
+          return { n, rows, factors, prime: rows.length === 1 };
+        }
+
+        function decompose(str) {
+          const n = parseOne(str);
+          if (n.err) return n;
+          if (n < 2n) return fail('la décomposition demande un entier supérieur ou égal à 2.');
+          const r = factorize(n);
+          if (r.err) return r;
+          return { ...r, root: isqrt(n) };
+        }
+
+        const product = (factors) => factors.reduce((a, f) => a * f.p ** BigInt(f.e), 1n);
+
+        function byDecomposition(str, mode) {
+          const list = parseList(str);
+          if (list.err) return list;
+          if (list.some((x) => x === 0n))
+            return fail(
+              'la méthode par décomposition ne s’applique pas à 0. utilisez l’algorithme d’euclide.',
+            );
+          const decs = [];
+          for (const n of list) {
+            const d = factorize(n);
+            if (d.err) return d;
+            decs.push(d);
+          }
+          const primes = [...new Set(decs.flatMap((d) => d.factors.map((f) => f.p)))].sort((a, b) =>
+            a < b ? -1 : 1,
+          );
+          const matrix = decs.map((d) => primes.map((p) => d.factors.find((f) => f.p === p)?.e ?? 0));
+          const pick = primes.map((p, j) => {
+            const column = matrix.map((row) => row[j]);
+            return mode === 'pgcd' ? Math.min(...column) : Math.max(...column);
+          });
+          const kept = primes.map((p, j) => ({ p, e: pick[j] })).filter((f) => f.e > 0);
+          return { list, decs, primes, matrix, pick, kept, value: product(kept), mode };
+        }
+
+        function euclid(a, b) {
+          const swapped = a < b;
+          let x = swapped ? b : a;
+          let y = swapped ? a : b;
+          const rows = [];
+          while (y > 0n) {
+            const q = x / y;
+            const r = x % y;
+            rows.push({ a: x, b: y, q, r });
+            x = y;
+            y = r;
+          }
+          return { a, b, swapped, rows, gcd: x };
+        }
+
+        function parsePair(str) {
+          const list = parseList(str, { min: 2, max: 2, label: 'entiers' });
+          if (list.err) return list;
+          if (list[0] === 0n && list[1] === 0n) return fail('le pgcd n’est pas défini pour 0 et 0.');
+          return list;
+        }
+
+        function euclidPair(str) {
+          const list = parsePair(str);
+          if (list.err) return list;
+          return euclid(list[0], list[1]);
+        }
+
+        function subtractions(str) {
+          const list = parsePair(str);
+          if (list.err) return list;
+          let [x, y] = list;
+          const rows = [];
+          if (x === 0n || y === 0n) return { a: list[0], b: list[1], rows, gcd: x + y, zero: true };
+          while (x !== y) {
+            const big = x > y ? x : y;
+            const small = x > y ? y : x;
+            rows.push({ big, small, d: big - small });
+            if (rows.length > 300)
+              return fail(
+                'il faudrait plus de 300 soustractions : utilisez plutôt les divisions euclidiennes.',
+              );
+            x = small;
+            y = big - small;
+          }
+          return { a: list[0], b: list[1], rows, gcd: x };
+        }
+
+        function lcmFromGcd(str) {
+          const list = parsePair(str);
+          if (list.err) return list;
+          if (list[0] === 0n || list[1] === 0n)
+            return fail('le ppcm se calcule pour des entiers strictement positifs.');
+          const e = euclid(list[0], list[1]);
+          const prod = list[0] * list[1];
+          return { a: list[0], b: list[1], euclid: e, gcd: e.gcd, prod, lcm: prod / e.gcd };
+        }
+
+        function fraction(str) {
+          const m = /^\s*(\d+)\s*\/\s*(\d+)\s*$/.exec(String(str));
+          if (!m) return fail('saisissez une fraction de la forme a/b, par exemple 84/126.');
+          const a = BigInt(m[1]);
+          const b = BigInt(m[2]);
+          if (b === 0n) return fail('le dénominateur ne peut pas être 0.');
+          if (a === 0n) return { a, b, zero: true, num: 0n, den: 1n, gcd: b };
+          const e = euclid(a, b);
+          return { a, b, euclid: e, gcd: e.gcd, num: a / e.gcd, den: b / e.gcd };
+        }
+
+        function sieve(str) {
+          const s = String(str).replace(/\s+/g, '');
+          if (!/^\d+$/.test(s)) return fail('saisissez la borne du crible, par exemple 100.');
+          const limit = Number(s);
+          if (limit < 10 || limit > 500)
+            return fail('choisissez une borne entre 10 et 500 pour que la grille reste lisible.');
+          const crossedBy = new Array(limit + 1).fill(0);
+          const primes = [];
+          const rounds = [];
+          let stop = 0;
+          for (let p = 2; p <= limit; p++) {
+            if (crossedBy[p]) continue;
+            primes.push(p);
+            if (p * p > limit) {
+              if (!stop) stop = p;
+              continue;
+            }
+            const fresh = [];
+            for (let m = p * p; m <= limit; m += p) {
+              if (!crossedBy[m]) {
+                crossedBy[m] = p;
+                fresh.push(m);
+              }
+            }
+            rounds.push({ p, fresh });
+          }
+          return { limit, primes, rounds, crossedBy, stop };
+        }
+
+        function primality(str) {
+          const n = parseOne(str);
+          if (n.err) return n;
+          if (n > 10n ** 10n) return fail('saisissez un nombre inférieur ou égal à 10 000 000 000.');
+          if (n < 2n) return { n, prime: false, small: true, rows: [] };
+          const root = isqrt(n);
+          const rows = [];
+          for (let p = 2n; p <= root; p = nextPrime(p)) {
+            rows.push({ p, q: n / p, r: n % p });
+            if (n % p === 0n) return { n, root, prime: false, rows, divisor: p };
+          }
+          return { n, root, prime: true, rows };
+        }
+
+        function both(str) {
+          const list = parseList(str, { min: 1, max: 8, label: 'entiers' });
+          if (list.err) return list;
+          if (list.length === 1) {
+            if (list[0] < 2n) return fail('la décomposition demande un entier supérieur ou égal à 2.');
+            const d = factorize(list[0]);
+            if (d.err) return d;
+            return { single: true, list, decs: [d] };
+          }
+          const g = byDecomposition(list.join(' '), 'pgcd');
+          if (g.err) return g;
+          const l = byDecomposition(list.join(' '), 'ppcm');
+          return {
+            list,
+            decs: g.decs,
+            primes: g.primes,
+            matrix: g.matrix,
+            min: g.pick,
+            max: l.pick,
+            gcdKept: g.kept,
+            lcmKept: l.kept,
+            gcd: g.value,
+            lcm: l.value,
+          };
+        }
+
+        function euclidBoth(str, method) {
+          const base = method === 'sub' ? subtractions(str) : euclidPair(str);
+          if (base.err) return base;
+          const positive = base.a > 0n && base.b > 0n;
+          return {
+            ...base,
+            method,
+            lcm: positive ? (base.a * base.b) / base.gcd : null,
+            prod: base.a * base.b,
+          };
+        }
+
+        return {
+          sieve,
+          primality,
+          both,
+          euclidBoth,
+          parseList,
+          factorize,
+          decompose,
+          byDecomposition,
+          euclid,
+          euclidPair,
+          subtractions,
+          lcmFromGcd,
+          fraction,
+          product,
+          isqrt,
+          isSmallPrime,
+        };
+      })();
+
+      (() => {
+        const esc = (s) =>
+          String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+        const nf = (x) => String(x).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+        const pw = (b, e) => (e === 1 ? nf(b) : `${nf(b)}<sup>${e}</sup>`);
+        const listFr = (items) =>
+          items.length < 2
+            ? items.join('')
+            : `${items.slice(0, -1).join(', ')} et ${items[items.length - 1]}`;
+        const ok = '<span class="ok">✓</span>';
+
+        const facStr = (factors) => (factors.length ? factors.map((f) => pw(f.p, f.e)).join(' × ') : '1');
+
+        function productCalc(factors) {
+          const value = AR.product(factors);
+          if (!factors.length) return '1';
+          const powers = factors.some((f) => f.e > 1)
+            ? ` = ${factors.map((f) => nf(f.p ** BigInt(f.e))).join(' × ')}`
+            : '';
+          return factors.length === 1 && factors[0].e === 1
+            ? nf(value)
+            : `${facStr(factors)}${powers} = ${nf(value)}`;
+        }
+
+        function criterionText(row) {
+          const n = nf(row.n);
+          const c = row.crit;
+          if (row.kind === 'premier') return '';
+          if (c.kind === 'pair') return `${n} est pair, il se termine par ${c.last}`;
+          if (c.kind === 'somme') {
+            const detail = c.digits.length <= 12 ? `${c.digits.join(' + ')} = ${c.sum}` : `${c.sum}`;
+            return `la somme de ses chiffres, ${detail}, est divisible par 3`;
+          }
+          if (c.kind === 'fin') return `${n} se termine par ${c.last}, il est divisible par 5`;
+          if (c.kind === 'alternee')
+            return `la somme alternée de ses chiffres vaut ${c.alt}, un multiple de 11`;
+          return `la division de ${n} par ${row.p} tombe juste`;
+        }
+
+        function skippedText(row) {
+          const parts = [];
+          const n = nf(row.n);
+          if (row.stopped) parts.push(`${n} n'est plus divisible par ${row.stopped}`);
+          const s = row.skipped.map(String);
+          if (s.length > 8)
+            parts.push(`${n} n'est divisible par aucun nombre premier de ${s[0]} à ${s[s.length - 1]}`);
+          else if (s.length > 1) parts.push(`${n} n'est divisible ni par ${listFr(s)}`);
+          else if (s.length === 1) parts.push(`${n} n'est pas divisible par ${s[0]}`);
+          return parts;
+        }
+
+        function decompositionLines(d) {
+          return d.rows.map((row) => {
+            const pre = row.kind === 'encore' ? [] : skippedText(row);
+            if (row.kind === 'premier') {
+              const square = row.bound * row.bound;
+              pre.push(
+                `${row.bound}<sup>2</sup> = ${nf(square)} dépasse ${nf(row.n)}, donc aucun nombre premier plus petit que √${nf(row.n)} ne le divise : <mark>${nf(row.n)} est premier</mark>`,
+              );
+              return pre.join(' ; ') + '.';
+            }
+            return `${[...pre, criterionText(row)].join(' ; ')} : ${nf(row.n)} = ${row.p} × <mark>${nf(row.q)}</mark>.`;
+          });
+        }
+
+        function decompositionChain(d) {
+          const parts = d.rows.map((row) =>
+            row.kind === 'premier' ? `${nf(row.n)} est premier` : `${nf(row.n)} = ${row.p} × ${nf(row.q)}`,
+          );
+          return `${parts.join(', ')}, donc <mark>${nf(d.n)} = ${facStr(d.factors)}</mark>.`;
+        }
+
+        function decompositionColumn(d, cls = '', caption = '') {
+          const cells = d.rows
+            .map((row) => `<span class="n">${nf(row.n)}</span><span class="p">${nf(row.p)}</span>`)
+            .join('');
+          return `<div class="fcol ${cls}">${caption ? `<span class="cap">${caption}</span>` : ''}<div class="scroll"><div class="fgrid">${cells}<span class="n end">1</span><span></span></div></div><div class="fres">${nf(d.n)} = <b>${facStr(d.factors)}</b></div></div>`;
+        }
+
+        function euclidSection(e, title = 'divisions euclidiennes successives') {
+          const last = e.rows.length - 1;
+          const body = e.rows
+            .map((r, i) => {
+              const hl = i === last ? ' class="hl"' : '';
+              const fromAbove = i > 0;
+              return `<tr${hl}><td class="${fromAbove ? 'carry' : ''}">${nf(r.a)}</td><td class="${fromAbove ? 'rest' : ''}">${nf(r.b)}</td><td>${nf(r.q)}</td><td class="${r.r === 0n ? 'done' : 'rest'}">${nf(r.r)}</td><td class="l">${nf(r.a)} = ${nf(r.b)} × ${nf(r.q)} + ${nf(r.r)}</td></tr>`;
+            })
+            .join('');
+          const viz = e.rows.length
+            ? `<div><h3>${title}</h3><div class="scroll"><table class="t"><thead><tr><th>dividende</th><th>diviseur</th><th>quotient</th><th>reste</th><th>égalité</th></tr></thead><tbody>${body}</tbody></table></div><p class="note">à chaque ligne, le diviseur devient le dividende (en bleu) et le reste devient le diviseur (en orange). le pgcd est le dernier reste non nul : ${nf(e.gcd)}.</p></div>`
+            : '';
+          const pair = `pgcd(${nf(e.a)}, ${nf(e.b)})`;
+          const steps = [];
+          if (!e.rows.length) {
+            const nonZero = e.a === 0n ? e.b : e.a;
+            steps.push(`tout entier divise 0, donc ${pair} = <mark>${nf(nonZero)}</mark>.`);
+            return { viz, steps, pair };
+          }
+          if (e.swapped)
+            steps.push(
+              `${nf(e.a)} est plus petit que ${nf(e.b)} : on commence par diviser ${nf(e.b)} par ${nf(e.a)}.`,
+            );
+          steps.push(
+            'on effectue des divisions euclidiennes : le diviseur devient le dividende et le reste devient le diviseur, jusqu’à obtenir un reste nul.',
+          );
+          e.rows.forEach((r) =>
+            steps.push(
+              `${nf(r.a)} = ${nf(r.b)} × ${nf(r.q)} + <mark>${nf(r.r)}</mark>${r.r === 0n ? ', le reste est nul' : ''}.`,
+            ),
+          );
+          steps.push(
+            e.rows.length === 1
+              ? `${nf(e.rows[0].b)} divise ${nf(e.rows[0].a)} : ${pair} = <mark>${nf(e.gcd)}</mark>.`
+              : `le dernier reste non nul est ${nf(e.gcd)}, donc ${pair} = <mark>${nf(e.gcd)}</mark>.`,
+          );
+          return { viz, steps, pair };
+        }
+
+        const coprimeNote = (list) =>
+          `${listFr(list.map(nf))} sont premiers entre eux : leur seul diviseur commun est 1.`;
+
+        function exponentTable(r) {
+          const head = `<tr><th></th>${r.primes.map((p) => `<th>${nf(p)}</th>`).join('')}</tr>`;
+          const rows = r.list
+            .map((n, i) => {
+              const cells = r.matrix[i].map((e, j) => {
+                const cls = [e === r.min[j] ? 'lo' : '', e === r.max[j] ? 'hi' : '', e === 0 ? 'zero' : '']
+                  .filter(Boolean)
+                  .join(' ');
+                return `<td class="${cls}">${e}</td>`;
+              });
+              return `<tr class="c${i % 4}"><td class="who">${nf(n)}</td>${cells.join('')}</tr>`;
+            })
+            .join('');
+          const gcdRow = `<tr class="rg"><td class="l">pgcd</td>${r.min.map((e) => `<td>${e}</td>`).join('')}</tr>`;
+          const lcmRow = `<tr class="rl"><td class="l">ppcm</td>${r.max.map((e) => `<td>${e}</td>`).join('')}</tr>`;
+          return `<div class="scroll"><table class="t"><thead>${head}</thead><tbody>${rows}${gcdRow}${lcmRow}</tbody></table></div><p class="note">chaque case donne l'exposant du facteur premier dans le nombre, 0 s'il n'y apparaît pas. en orange, le plus petit exposant de chaque colonne, retenu pour le pgcd ; en bleu, le plus grand, retenu pour le ppcm.</p>`;
+        }
+
+        function exponentLine(r, f, word) {
+          const j = r.primes.indexOf(f.p);
+          const kept = f.e === 1 ? `${nf(f.p)}<sup>1</sup> = ${nf(f.p)}` : pw(f.p, f.e);
+          return `facteur ${nf(f.p)} : exposants ${listFr(r.matrix.map((row) => String(row[j])))}, le plus ${word} est ${f.e}, on garde ${kept}.`;
+        }
+
+        function stepper(count, k) {
+          const atStart = k === 0;
+          const atEnd = k === count - 1;
+          return `<div class="stepper" role="group" aria-label="parcourir les étapes">
+      <button type="button" data-step="first"${atStart ? ' disabled' : ''}>début</button>
+      <button type="button" data-step="prev" aria-label="étape précédente"${atStart ? ' disabled' : ''}>◀</button>
+      <button type="button" data-step="next" aria-label="étape suivante"${atEnd ? ' disabled' : ''}>▶</button>
+      <button type="button" data-step="last"${atEnd ? ' disabled' : ''}>tout</button>
+      <span class="count">${atEnd ? `${count} étapes` : `étape ${k + 1} sur ${count}`}</span>
+    </div>`;
+        }
+
+        function render(o, step) {
+          if (o.err)
+            return `<div class="error"><div class="line">saisie invalide</div><div class="tail">${esc(o.err)}</div></div>`;
+          const count = o.steps.length;
+          const k = step ?? count - 1;
+          const paging = k < count - 1;
+          const items = o.steps.map((s, i) => {
+            const cls = !paging ? '' : i < k ? 'past' : i === k ? 'current' : 'later';
+            return `<li${cls ? ` class="${cls}"` : ''}><span>${s}</span></li>`;
+          });
+          const viz = o.stepViz
+            ? `${stepper(count, k)}<p class="caption">${o.steps[k]}</p>${o.stepViz(k)}`
+            : o.viz;
+          return `<section class="result"><div class="line">réponse</div><div class="ans">${o.answer}</div>${o.note ? `<div class="tail"><span>${o.note}</span></div>` : ''}</section>
+      <section class="box viz"><div class="line">schéma</div><div class="viz-body">${viz}</div></section>
+      <section class="box steps"><div class="line">étapes</div>${count > 1 ? stepper(count, k) : ''}<ol>${items.join('')}</ol></section>`;
+        }
+
+        const ROUND_COLORS = ['k0', 'k1', 'k2', 'k3', 'k4', 'k5'];
+        const roundColor = (i) => ROUND_COLORS[i % ROUND_COLORS.length];
+
+        function sieveGrid(sv, step) {
+          const rounds = sv.rounds.length;
+          const applied = Math.min(Math.max(step, 0), rounds);
+          const finished = step > rounds;
+          const roundOf = new Map(sv.rounds.map((r, i) => [r.p, i]));
+          const primes = new Set(sv.primes);
+          const cells = [];
+          for (let n = 1; n <= sv.limit; n++) {
+            const by = sv.crossedBy[n];
+            const round = by ? roundOf.get(by) : -1;
+            let cls = '';
+            let label = `${n}`;
+            if (n === 1) {
+              cls = 'x one';
+              label = '1, barré : pas premier';
+            } else if (by && round < applied) {
+              cls = `x ${roundColor(round)}${round === applied - 1 && !finished ? ' now' : ''}`;
+              label = `${n}, barré comme multiple de ${by}`;
+            } else if (primes.has(n) && roundOf.has(n) && roundOf.get(n) < applied) {
+              cls = `p ${roundColor(roundOf.get(n))}`;
+              label = `${n}, premier`;
+            } else if (primes.has(n) && finished) {
+              cls = 'p rest';
+              label = `${n}, premier`;
+            }
+            cells.push(`<span class="${cls}" title="${label}">${n}</span>`);
+          }
+          const legend = sv.rounds
+            .slice(0, finished ? rounds : applied)
+            .map((r, i) => `<span class="${roundColor(i)}" style="--c:var(--kc)">multiples de ${r.p}</span>`)
+            .join('');
+          return `<div class="sieve" role="img" aria-label="grille des nombres de 1 à ${sv.limit}">${cells.join('')}</div>${legend ? `<div class="legend">${legend}${finished ? '<span style="--c:var(--ink)">nombres premiers restants</span>' : ''}</div>` : ''}`;
+        }
+
+        function sizeInputs() {
+          panel.querySelectorAll('.prompt:not(.small) input').forEach((el) => {
+            el.style.width = `${Math.max(20, el.value.length + 2)}ch`;
+          });
+        }
+
+        const TABS = [];
+        const tab = (id, name, form, run, examples, presets = {}) =>
+          TABS.push({ id, name, form, run, examples, presets });
+        const seg = (id, options, value) =>
+          `<div class="seg" id="${id}" data-val="${value}">${options.map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${v === value}">${l}</button>`).join('')}</div>`;
+        const field = (label, html, { wide = false, forId = '' } = {}) =>
+          `<div class="field${wide ? ' wide' : ''}">${forId ? `<label for="${forId}">${label}</label>` : `<span>${label}</span>`}${html}</div>`;
+        const keyboards = { 'cr-n': 'numeric', 'cr-t': 'numeric' };
+        const input = (id, value) =>
+          `<div class="prompt"><input id="${id}" value="${esc(value)}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"${keyboards[id] ? ` inputmode="${keyboards[id]}"` : ''}></div>`;
+        const valueOf = (id) => {
+          const el = document.getElementById(id);
+          return el.dataset.val ?? el.value;
+        };
+        const showField = (id, visible) => {
+          document.getElementById(id).closest('.field').hidden = !visible;
+        };
+
+        tab(
+          'crible',
+          'crible et nombres premiers',
+          () =>
+            `<div class="fields">${field(
+              'outil',
+              seg(
+                'cr-m',
+                [
+                  ['crible', 'crible d’ératosthène'],
+                  ['test', 'tester un nombre'],
+                ],
+                'crible',
+              ),
+              { wide: true },
+            )}${field('jusqu’à', input('cr-n', '100'), { forId: 'cr-n' })}${field('nombre à tester', input('cr-t', '91'), { wide: true, forId: 'cr-t' })}</div>`,
+          () => {
+            const mode = valueOf('cr-m');
+            showField('cr-n', mode === 'crible');
+            showField('cr-t', mode === 'test');
+            if (mode === 'crible') {
+              const sv = AR.sieve(valueOf('cr-n'));
+              if (sv.err) return sv;
+              const steps = [
+                `on écrit les nombres de 1 à ${sv.limit}, dix par ligne. 1 n’est pas premier : il n’a qu’un seul diviseur. on le barre.`,
+              ];
+              sv.rounds.forEach((r, i) => {
+                const shown = r.fresh.slice(0, 8).map(String).join(', ');
+                const more = r.fresh.length > 8 ? ', …' : '';
+                const before = i ? ` les multiples plus petits que ${r.p}<sup>2</sup> sont déjà barrés.` : '';
+                steps.push(
+                  `le premier nombre non barré est ${r.p} : il est premier, on l’entoure. on barre ses multiples à partir de ${r.p}<sup>2</sup> = ${r.p * r.p} : ${shown}${more} (<mark>${r.fresh.length} nombre${r.fresh.length > 1 ? 's' : ''}</mark>).${before}`,
+                );
+              });
+              steps.push(
+                `le nombre non barré suivant est ${sv.stop}, et ${sv.stop}<sup>2</sup> = ${sv.stop * sv.stop} dépasse ${sv.limit} : on peut s’arrêter. tous les nombres qui restent sont premiers, il y en a <mark>${sv.primes.length}</mark>.`,
+              );
+              return {
+                answer: `${sv.primes.length} nombres premiers jusqu’à ${sv.limit}`,
+                note: sv.primes.join(', '),
+                stepViz: (k) => sieveGrid(sv, k),
+                steps,
+              };
+            }
+            const r = AR.primality(valueOf('cr-t'));
+            if (r.err) return r;
+            if (r.n < 2n) {
+              return {
+                answer: `${nf(r.n)} n’est pas premier`,
+                viz: '<p class="note">un nombre premier a exactement deux diviseurs : 1 et lui-même. 0 en a une infinité, 1 n’en a qu’un.</p>',
+                steps: [
+                  `un nombre premier a exactement deux diviseurs, 1 et lui-même : <mark>${nf(r.n)} n’est pas premier</mark>.`,
+                ],
+              };
+            }
+            const body = r.rows
+              .slice(0, 60)
+              .map(
+                (x) =>
+                  `<tr${x.r === 0n ? ' class="hl"' : ''}><td>${nf(x.p)}</td><td class="l">${nf(r.n)} = ${nf(x.p)} × ${nf(x.q)} + ${nf(x.r)}</td><td class="${x.r === 0n ? 'rest' : 'zero'}">${nf(x.r)}</td></tr>`,
+              )
+              .join('');
+            const table = r.rows.length
+              ? `<div><h3>divisions par les nombres premiers jusqu’à √${nf(r.n)} ≈ ${nf(r.root)}</h3><div class="scroll"><table class="t"><thead><tr><th>premier</th><th>division euclidienne</th><th>reste</th></tr></thead><tbody>${body}</tbody></table></div>${r.rows.length > 60 ? `<p class="note">et ${r.rows.length - 60} autres divisions, toutes avec un reste non nul.</p>` : ''}</div>`
+              : `<p class="note">√${nf(r.n)} est plus petit que 2 : il n’y a aucune division à faire.</p>`;
+            const tested = r.rows.map((x) => nf(x.p));
+            const steps = [
+              `on cherche un diviseur premier de ${nf(r.n)} parmi les nombres premiers jusqu’à √${nf(r.n)} ≈ ${nf(r.root)} : au-delà, il faudrait un autre diviseur plus petit, déjà testé.`,
+            ];
+            if (r.rows.length <= 12)
+              r.rows.forEach((x) =>
+                steps.push(
+                  `${nf(r.n)} = ${nf(x.p)} × ${nf(x.q)} + <mark>${nf(x.r)}</mark>${x.r === 0n ? `, le reste est nul : ${nf(x.p)} divise ${nf(r.n)}` : ''}.`,
+                ),
+              );
+            else
+              steps.push(
+                `on teste ${tested.length} nombres premiers, de 2 à ${tested[tested.length - 1]}${r.prime ? ' : aucun ne divise ' + nf(r.n) : ''}.`,
+              );
+            steps.push(
+              r.prime
+                ? `aucun nombre premier jusqu’à √${nf(r.n)} ne divise ${nf(r.n)} : <mark>${nf(r.n)} est premier</mark>.`
+                : `${nf(r.n)} = ${nf(r.divisor)} × ${nf(r.n / r.divisor)} : <mark>${nf(r.n)} n’est pas premier</mark>.`,
+            );
+            return {
+              answer: r.prime
+                ? `${nf(r.n)} est premier`
+                : `${nf(r.n)} n’est pas premier : ${nf(r.n)} = ${nf(r.divisor)} × ${nf(r.n / r.divisor)}`,
+              viz: table,
+              steps,
+            };
+          },
+          [
+            ['crible jusqu’à 100', { 'cr-m': 'crible', 'cr-n': '100' }],
+            ['crible jusqu’à 200', { 'cr-m': 'crible', 'cr-n': '200' }],
+            ['97 est-il premier ?', { 'cr-m': 'test', 'cr-t': '97' }],
+            ['91 est-il premier ?', { 'cr-m': 'test', 'cr-t': '91' }],
+            ['1001 est-il premier ?', { 'cr-m': 'test', 'cr-t': '1001' }],
+            ['2027 est-il premier ?', { 'cr-m': 'test', 'cr-t': '2027' }],
+          ],
+          { 'cr-m': { crible: { 'cr-n': '100' }, test: { 'cr-t': '91' } } },
+        );
+
+        tab(
+          'decomposition',
+          'décomposition, pgcd et ppcm',
+          () =>
+            `<div class="fields">${field('nombres, séparés par un espace', input('dc-n', '84 126'), { wide: true, forId: 'dc-n' })}</div>`,
+          () => {
+            const r = AR.both(valueOf('dc-n'));
+            if (r.err) return r;
+            if (r.single) {
+              const d = r.decs[0];
+              return {
+                answer: d.prime ? `${nf(d.n)} est premier` : `${nf(d.n)} = ${facStr(d.factors)}`,
+                note: 'saisissez au moins deux nombres pour obtenir aussi leur pgcd et leur ppcm.',
+                viz: `<div><h3>divisions successives par les nombres premiers</h3>${decompositionColumn(d)}<p class="note">à gauche, le nombre qui reste à diviser ; à droite, en orange, le nombre premier qui le divise.</p></div>`,
+                steps: [
+                  `on divise ${nf(d.n)} par le plus petit nombre premier possible, puis on recommence avec le quotient jusqu’à obtenir 1.`,
+                  ...decompositionLines(d),
+                  d.prime
+                    ? `${nf(d.n)} n’a pas d’autre diviseur que 1 et lui-même : sa décomposition est <mark>${nf(d.n)}</mark>.`
+                    : `on regroupe les facteurs identiques avec des exposants : <mark>${nf(d.n)} = ${facStr(d.factors)}</mark>.`,
+                ],
+              };
+            }
+            const names = r.list.map(nf).join(', ');
+            const columns = r.decs.map((d, i) => decompositionColumn(d, `c${i % 4}`, nf(d.n))).join('');
+            const steps = [
+              'on décompose chaque nombre en facteurs premiers :',
+              ...r.decs.map((d) => (d.n === 1n ? '1 n’a aucun facteur premier.' : decompositionChain(d))),
+            ];
+            if (r.gcdKept.length) {
+              steps.push(
+                `pgcd : on garde les facteurs premiers communs à tous les nombres, ${listFr(r.gcdKept.map((f) => nf(f.p)))}, chacun avec son plus petit exposant :`,
+              );
+              r.gcdKept.forEach((f) => steps.push(exponentLine(r, f, 'petit')));
+              steps.push(`<mark>pgcd(${names}) = ${productCalc(r.gcdKept)}</mark>.`);
+            } else {
+              steps.push(
+                `pgcd : aucun facteur premier n’est commun à tous les nombres, donc <mark>pgcd(${names}) = 1</mark>.`,
+              );
+            }
+            steps.push(
+              'ppcm : on garde tous les facteurs premiers qui apparaissent, chacun avec son plus grand exposant :',
+            );
+            r.lcmKept.forEach((f) => steps.push(exponentLine(r, f, 'grand')));
+            steps.push(`<mark>ppcm(${names}) = ${productCalc(r.lcmKept)}</mark>.`);
+            if (r.list.length === 2) {
+              steps.push(
+                `vérification : pgcd × ppcm = ${nf(r.gcd)} × ${nf(r.lcm)} = ${nf(r.gcd * r.lcm)}, et ${nf(r.list[0])} × ${nf(r.list[1])} = ${nf(r.list[0] * r.list[1])} ${ok}`,
+              );
+            }
+            return {
+              answer: `pgcd(${names}) = ${nf(r.gcd)}<br>ppcm(${names}) = ${nf(r.lcm)}`,
+              note: r.gcd === 1n ? coprimeNote(r.list) : '',
+              viz: `<div><h3>1. décomposition de chaque nombre</h3><div class="fcols">${columns}</div></div><div><h3>2. exposants de chaque facteur premier</h3>${exponentTable(r)}</div>`,
+              steps,
+            };
+          },
+          [
+            ['84 et 126', { 'dc-n': '84 126' }],
+            ['360 et 48', { 'dc-n': '360 48' }],
+            ['252 et 198', { 'dc-n': '252 198' }],
+            ['18 et 35', { 'dc-n': '18 35' }],
+            ['84, 126 et 210', { 'dc-n': '84 126 210' }],
+            ['360 seul', { 'dc-n': '360' }],
+          ],
+        );
+
+        tab(
+          'euclide',
+          'euclide, pgcd et ppcm',
+          () =>
+            `<div class="fields">${field(
+              'méthode',
+              seg(
+                'eu-m',
+                [
+                  ['div', 'divisions euclidiennes'],
+                  ['sub', 'soustractions successives'],
+                ],
+                'div',
+              ),
+              { wide: true },
+            )}${field('deux nombres, séparés par un espace', input('eu-n', '1071 462'), { wide: true, forId: 'eu-n' })}</div>`,
+          () => {
+            const r = AR.euclidBoth(valueOf('eu-n'), valueOf('eu-m'));
+            if (r.err) return r;
+            const pair = `${nf(r.a)}, ${nf(r.b)}`;
+            let viz;
+            let steps;
+            if (r.method === 'div') {
+              const s = euclidSection(r, '1. pgcd par divisions euclidiennes');
+              viz = s.viz || '<p class="note">pas de division à faire : l’un des nombres vaut 0.</p>';
+              steps = s.steps;
+            } else if (r.zero) {
+              viz = '<p class="note">pas de soustraction à faire : l’un des nombres vaut 0.</p>';
+              steps = [`tout entier divise 0, donc pgcd(${pair}) = <mark>${nf(r.gcd)}</mark>.`];
+            } else {
+              const body = r.rows
+                .map(
+                  (x) =>
+                    `<tr><td>${nf(x.big)}</td><td>${nf(x.small)}</td><td class="rest">${nf(x.d)}</td><td class="l">pgcd(${nf(x.big)}, ${nf(x.small)}) = pgcd(${nf(x.small)}, ${nf(x.d)})</td></tr>`,
+                )
+                .join('');
+              const final = r.rows.length
+                ? `<tr class="hl"><td>${nf(r.gcd)}</td><td>${nf(r.gcd)}</td><td>0</td><td class="l">nombres égaux : pgcd = ${nf(r.gcd)}</td></tr>`
+                : '';
+              viz = `<div><h3>1. pgcd par soustractions successives</h3><div class="scroll"><table class="t"><thead><tr><th>plus grand</th><th>plus petit</th><th>différence</th><th>égalité</th></tr></thead><tbody>${body}${final}</tbody></table></div><p class="note">à chaque ligne, on garde le plus petit nombre et la différence.</p></div>`;
+              steps = [
+                'on utilise pgcd(a, b) = pgcd(b, a − b) : on remplace le plus grand nombre par la différence des deux, jusqu’à obtenir deux nombres égaux.',
+                ...r.rows.map(
+                  (x) =>
+                    `${nf(x.big)} − ${nf(x.small)} = <mark>${nf(x.d)}</mark>, donc on cherche pgcd(${nf(x.small)}, ${nf(x.d)}).`,
+                ),
+                `les deux nombres sont égaux : pgcd(${pair}) = <mark>${nf(r.gcd)}</mark>.`,
+              ];
+            }
+            if (r.lcm !== null) {
+              viz += `<div><h3>2. ppcm par la formule</h3><div class="norm">ppcm(${pair}) = ${nf(r.a)} × ${nf(r.b)} ÷ ${nf(r.gcd)} = ${nf(r.prod)} ÷ ${nf(r.gcd)} = <mark>${nf(r.lcm)}</mark></div><p class="note">pour deux nombres, pgcd × ppcm = a × b.</p></div>`;
+              steps.push(
+                'ppcm : on utilise ppcm(a, b) = a × b ÷ pgcd(a, b).',
+                `${nf(r.a)} × ${nf(r.b)} = ${nf(r.prod)}.`,
+                `${nf(r.prod)} ÷ ${nf(r.gcd)} = <mark>${nf(r.lcm)}</mark>, donc ppcm(${pair}) = ${nf(r.lcm)}.`,
+              );
+            }
+            return {
+              answer: `pgcd(${pair}) = ${nf(r.gcd)}${r.lcm !== null ? `<br>ppcm(${pair}) = ${nf(r.lcm)}` : ''}`,
+              note:
+                r.lcm === null
+                  ? 'le ppcm n’est pas défini quand un des nombres vaut 0.'
+                  : r.gcd === 1n
+                    ? coprimeNote([r.a, r.b])
+                    : '',
+              viz,
+              steps,
+            };
+          },
+          [
+            ['1071 et 462', { 'eu-n': '1071 462' }],
+            ['252 et 198', { 'eu-n': '252 198' }],
+            ['84 et 126', { 'eu-n': '84 126' }],
+            ['17 et 5', { 'eu-n': '17 5' }],
+            ['1000 et 625', { 'eu-n': '1000 625' }],
+            ['12 et 18', { 'eu-n': '12 18' }],
+          ],
+          { 'eu-m': { div: { 'eu-n': '1071 462' }, sub: { 'eu-n': '252 198' } } },
+        );
+
+        const CARRY = {};
+
+        const HOME = {
+          id: 'accueil',
+          name: 'accueil',
+          descriptions: {
+            crible: 'le crible d’ératosthène sur une grille, et le test d’un nombre',
+            decomposition: 'facteurs premiers, puis pgcd et ppcm par les exposants',
+            euclide: 'pgcd par divisions ou soustractions, puis ppcm par la formule',
+          },
+        };
+
+        function homePage() {
+          const items = TABS.map(
+            (t) =>
+              `<li><button type="button" data-go="${t.id}"><b>${t.name}</b><span>${HOME.descriptions[t.id]}</span></button></li>`,
+          );
+          return `<section class="home"><h1><span aria-hidden="true">✻</span>correcteur de pgcd et ppcm</h1><p>choisissez un outil. chaque résultat est corrigé étape par étape, avec un schéma.</p><ul>${items.join('')}</ul></section>`;
+        }
+
+        const PAGES = [HOME, ...TABS];
+        const tabs = document.getElementById('tabs');
+        const panel = document.getElementById('panel');
+        const drawer = document.getElementById('drawer');
+        const drawerList = document.getElementById('drawer-list');
+        const scrim = document.getElementById('scrim');
+        const burger = document.getElementById('burger');
+        let current;
+        const selectValues = {};
+
+        tabs.innerHTML =
+          `<button type="button" class="home-link" data-id="accueil" aria-label="accueil">✻</button>` +
+          TABS.map((t) => `<button type="button" role="tab" data-id="${t.id}">${t.name}</button>`).join('');
+        drawerList.innerHTML = TABS.map(
+          (t) => `<li><button type="button" data-id="${t.id}">${t.name}</button></li>`,
+        ).join('');
+
+        function openDrawer() {
+          drawer.inert = false;
+          drawer.classList.add('open');
+          scrim.hidden = false;
+          burger.setAttribute('aria-expanded', 'true');
+          drawerList.querySelector('[aria-current="true"]')?.focus();
+        }
+
+        function closeDrawer(returnFocus = false) {
+          if (!drawer.classList.contains('open')) return;
+          drawer.classList.remove('open');
+          drawer.inert = true;
+          scrim.hidden = true;
+          burger.setAttribute('aria-expanded', 'false');
+          if (returnFocus) burger.focus();
+        }
+
+        function show(id) {
+          if (panel.contains(document.activeElement)) document.activeElement.blur();
+          current = PAGES.find((t) => t.id === id) || HOME;
+          tabs
+            .querySelectorAll('button')
+            .forEach((b) => b.setAttribute('aria-selected', String(b.dataset.id === current.id)));
+          drawerList
+            .querySelectorAll('button')
+            .forEach((b) => b.setAttribute('aria-current', String(b.dataset.id === current.id)));
+          document.getElementById('crumb').textContent = current.name;
+          if (current === HOME) {
+            panel.innerHTML = homePage();
+            return;
+          }
+          const examples = current.examples
+            .map(([label], i) => `<button type="button" data-i="${i}">${esc(label)}</button>`)
+            .join('');
+          panel.innerHTML = `<div class="enonce">${current.form()}<div class="ex">exemples ${examples}</div></div><div class="out" id="out" aria-live="polite"></div>`;
+          panel.querySelectorAll('select').forEach((el) => (selectValues[el.id] = el.value));
+          update();
+        }
+
+        let lastResult = null;
+        let stepIndex = null;
+
+        function update() {
+          let result;
+          try {
+            result = current.run();
+          } catch (error) {
+            console.error(error);
+            result = { err: 'calcul impossible avec cette valeur, vérifiez la saisie.' };
+          }
+          lastResult = result;
+          stepIndex = null;
+          sizeInputs();
+          const out = document.getElementById('out');
+          out.classList.remove('quiet');
+          out.innerHTML = render(result);
+        }
+
+        function stepTo(action, which) {
+          if (!lastResult || lastResult.err) return;
+          const count = lastResult.steps.length;
+          const k = stepIndex ?? count - 1;
+          const target = { first: 0, prev: k - 1, next: k + 1, last: count - 1 }[action];
+          stepIndex = Math.max(0, Math.min(count - 1, target));
+          const out = document.getElementById('out');
+          out.classList.add('quiet');
+          out.innerHTML = render(lastResult, stepIndex);
+          const bar = out.querySelectorAll('.stepper')[which];
+          const again =
+            bar?.querySelector(`[data-step="${action}"]:not(:disabled)`) ||
+            bar?.querySelector('[data-step]:not(:disabled)');
+          again?.focus({ preventScroll: true });
+        }
+
+        function setValue(id, value) {
+          const el = document.getElementById(id);
+          if (!el) return;
+          if (el.classList.contains('seg')) {
+            el.dataset.val = value;
+            el.querySelectorAll('button').forEach((b) =>
+              b.setAttribute('aria-pressed', String(b.dataset.v === value)),
+            );
+          } else {
+            el.value = value;
+            if (el.tagName === 'SELECT') selectValues[id] = el.value;
+          }
+        }
+
+        const memory = {};
+        const snapshot = () =>
+          Object.fromEntries(
+            [...panel.querySelectorAll('.enonce input, .enonce select, .enonce .seg')].map((el) => [
+              el.id,
+              valueOf(el.id),
+            ]),
+          );
+
+        function switchMode(id, from, to) {
+          const state = { ...snapshot(), [id]: from };
+          const back = memory[current.id + id];
+          if (
+            back &&
+            back.to === from &&
+            back.before[id] === to &&
+            JSON.stringify(state) === JSON.stringify(back.after)
+          ) {
+            Object.entries(back.before).forEach(([k, v]) => setValue(k, v));
+            delete memory[current.id + id];
+            return;
+          }
+          setValue(id, to);
+          const carried = CARRY[current.id]?.[id]?.(to, from);
+          if (carried) Object.entries(carried).forEach(([k, v]) => setValue(k, v));
+          if (current.run().err) {
+            const preset = current.presets?.[id]?.[to];
+            if (preset) Object.entries(preset).forEach(([k, v]) => setValue(k, v));
+          }
+          memory[current.id + id] = { to, before: state, after: snapshot() };
+        }
+
+        function select(id) {
+          show(id);
+          closeDrawer();
+          try {
+            history.replaceState(null, '', id === HOME.id ? location.pathname : '#' + id);
+          } catch (error) {}
+        }
+
+        function fit() {
+          document.body.classList.remove('compact');
+          const lines = new Set([...tabs.children].map((b) => b.offsetTop)).size;
+          const compact = lines > 1;
+          document.body.classList.toggle('compact', compact);
+          if (!compact) closeDrawer();
+        }
+
+        tabs.addEventListener('click', (e) => {
+          const b = e.target.closest('button');
+          if (b) select(b.dataset.id);
+        });
+        drawerList.addEventListener('click', (e) => {
+          const b = e.target.closest('button');
+          if (b) {
+            select(b.dataset.id);
+            burger.focus();
+          }
+        });
+        burger.addEventListener('click', openDrawer);
+        drawer.querySelector('.drawer-home').addEventListener('click', () => {
+          select('accueil');
+          burger.focus();
+        });
+        scrim.addEventListener('click', () => closeDrawer(true));
+        document.getElementById('drawer-close').addEventListener('click', () => closeDrawer(true));
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') closeDrawer(true);
+        });
+
+        panel.addEventListener('input', update);
+        panel.addEventListener('change', (e) => {
+          if (e.target.tagName === 'SELECT') {
+            switchMode(e.target.id, selectValues[e.target.id], e.target.value);
+            selectValues[e.target.id] = e.target.value;
+          }
+          update();
+        });
+        panel.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && e.target.tagName === 'INPUT') e.target.blur();
+        });
+        panel.addEventListener('click', (e) => {
+          const go = e.target.closest('[data-go]');
+          if (go) {
+            select(go.dataset.go);
+            scrollTo(0, 0);
+            return;
+          }
+          const stepButton = e.target.closest('[data-step]');
+          if (stepButton) {
+            stepTo(
+              stepButton.dataset.step,
+              [...panel.querySelectorAll('.stepper')].indexOf(stepButton.closest('.stepper')),
+            );
+            return;
+          }
+          const segButton = e.target.closest('.seg button');
+          if (segButton) {
+            const id = segButton.parentElement.id;
+            const from = valueOf(id);
+            if (from !== segButton.dataset.v) switchMode(id, from, segButton.dataset.v);
+            update();
+            return;
+          }
+          const example = e.target.closest('.ex button');
+          if (example) {
+            Object.entries(current.examples[+example.dataset.i][1]).forEach(([k, v]) => setValue(k, v));
+            update();
+            if (innerWidth < 720) {
+              const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+              document
+                .querySelector('.result')
+                ?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+            }
+          }
+        });
+
+        window.addEventListener('hashchange', () => {
+          if (location.hash.slice(1) !== current.id) show(location.hash.slice(1));
+        });
+        let lastWidth = 0;
+        new ResizeObserver(([entry]) => {
+          const width = Math.round(entry.contentRect.width);
+          if (width === lastWidth) return;
+          lastWidth = width;
+          requestAnimationFrame(fit);
+        }).observe(document.querySelector('.wrap'));
+        if (document.fonts) document.fonts.ready.then(fit);
+        show(location.hash.slice(1));
+        fit();
+      })();
+    </script>
+  </body>
+</html>
